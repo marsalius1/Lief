@@ -72,6 +72,24 @@ export default function useRoutines() {
     }));
   }, []);
 
+  const duplicateRoutine = useCallback((id) => {
+    setState((prev) => {
+      const source = prev.routines.find((r) => r.id === id);
+      if (!source) return prev;
+      const newId = crypto.randomUUID();
+      const clone = {
+        ...source,
+        id: newId,
+        name: `${source.name} (copy)`,
+        tasks: source.tasks.map((t) => ({ ...t, id: crypto.randomUUID() })),
+      };
+      return {
+        routines: [...prev.routines, clone],
+        activeRoutineId: newId,
+      };
+    });
+  }, []);
+
   const deleteRoutine = useCallback((id) => {
     setState((prev) => {
       const remaining = prev.routines.filter((r) => r.id !== id);
@@ -214,6 +232,7 @@ export default function useRoutines() {
     setActiveRoutineId,
     addRoutine,
     renameRoutine,
+    duplicateRoutine,
     deleteRoutine,
     addTask,
     updateTask,

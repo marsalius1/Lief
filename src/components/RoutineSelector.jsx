@@ -142,6 +142,12 @@ export default function RoutineSelector({ routines: r, onShareRoutine }) {
             Rename
           </button>
           <button
+            onClick={() => { r.duplicateRoutine(contextMenu.routine.id); setContextMenu(null); }}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+          >
+            Duplicate
+          </button>
+          <button
             onClick={() => { onShareRoutine(contextMenu.routine); setContextMenu(null); }}
             className="w-full text-left px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
           >
