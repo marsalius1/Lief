@@ -1,8 +1,9 @@
 // Template list — shows all weekly templates, highlights active, inline input to create new
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function RoutineSelector({ routines: r }) {
   const [newName, setNewName] = useState('');
+  const inputRef = useRef(null);
 
   function handleAdd() {
     const trimmed = newName.trim();
@@ -60,16 +61,27 @@ export default function RoutineSelector({ routines: r }) {
       </div>
 
       {/* Always-visible input for new template */}
-      <input
-        value={newName}
-        onChange={(e) => setNewName(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') handleAdd();
-          if (e.key === 'Escape') setNewName('');
-        }}
-        placeholder="New template..."
-        className="w-full bg-slate-800/50 border border-slate-700 rounded-md px-2.5 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-slate-800"
-      />
+      <div className="flex items-center gap-2 px-2 py-1.5">
+        <button
+          onClick={() => inputRef.current?.focus()}
+          className="text-slate-400 hover:text-white transition-colors flex-shrink-0"
+        >
+          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+        <input
+          ref={inputRef}
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleAdd();
+            if (e.key === 'Escape') { setNewName(''); e.target.blur(); }
+          }}
+          placeholder="New template..."
+          className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 outline-none"
+        />
+      </div>
     </div>
   );
 }
