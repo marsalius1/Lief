@@ -81,7 +81,7 @@ export default function Sidebar({ routines, onTaskClick, activeId }) {
         <div className="mx-4 mt-3 px-3 py-2 rounded bg-yellow-900/40 border border-yellow-700/50 flex items-start gap-2">
           <span className="text-yellow-500 text-sm flex-shrink-0 mt-px">&#9888;</span>
           <p className="text-xs text-yellow-300/90">
-            Safari may clear local data after 7 days. Share your template regularly to keep a backup.
+            Safari automatically deletes locally stored data after 7 consecutive days of inactivity.
           </p>
         </div>
       )}
