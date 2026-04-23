@@ -1,15 +1,49 @@
 // Template list — shows all weekly templates, highlights active, inline input to create new
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-export default function RoutineSelector({ routines: r }) {
+export default function RoutineSelector({ routines: r, onShareRoutine }) {
   const [newName, setNewName] = useState('');
   const inputRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null); // { x, y, routine }
+  const [renamingId, setRenamingId] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const renameRef = useRef(null);
+
+  useEffect(() => {
+    if (renamingId) renameRef.current?.focus();
+  }, [renamingId]);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, [contextMenu]);
 
   function handleAdd() {
     const trimmed = newName.trim();
     if (!trimmed) return;
     r.addRoutine(trimmed);
     setNewName('');
+  }
+
+  function handleContextMenu(e, routine) {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, routine });
+  }
+
+  function startRename(routine) {
+    setRenamingId(routine.id);
+    setRenameValue(routine.name);
+    setContextMenu(null);
+  }
+
+  function commitRename() {
+    if (renameValue.trim() && renamingId) {
+      r.renameRoutine(renamingId, renameValue.trim());
+    }
+    setRenamingId(null);
+    setRenameValue('');
   }
 
   return (
@@ -22,10 +56,12 @@ export default function RoutineSelector({ routines: r }) {
       <div className="space-y-0.5 mb-2">
         {r.routines.map((routine) => {
           const isActive = routine.id === r.activeRoutineId;
+          const isRenaming = renamingId === routine.id;
           return (
             <div
               key={routine.id}
-              onClick={() => r.setActiveRoutineId(routine.id)}
+              onClick={() => !isRenaming && r.setActiveRoutineId(routine.id)}
+              onContextMenu={(e) => handleContextMenu(e, routine)}
               className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors ${
                 isActive
                   ? 'bg-slate-700 text-white'
@@ -38,9 +74,19 @@ export default function RoutineSelector({ routines: r }) {
                   isActive ? 'bg-blue-400' : 'bg-transparent'
                 }`}
               />
-              <span className="flex-1 truncate">{routine.name}</span>
-              {/* Delete — hidden for the first routine (Default) */}
-              {r.routines.length > 1 && (
+              {isRenaming ? (
+                <input
+                  ref={renameRef}
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') commitRename(); if (e.key === 'Escape') { setRenamingId(null); setRenameValue(''); } }}
+                  onBlur={commitRename}
+                  className="flex-1 bg-slate-900 text-sm text-white rounded px-1.5 py-0.5 outline-none focus:ring-1 focus:ring-blue-500"
+                />
+              ) : (
+                <span className="flex-1 truncate">{routine.name}</span>
+              )}
+              {r.routines.length > 1 && !isRenaming && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -82,6 +128,27 @@ export default function RoutineSelector({ routines: r }) {
           className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 outline-none"
         />
       </div>
+
+      {/* Context menu */}
+      {contextMenu && (
+        <div
+          className="fixed z-[100] bg-slate-800 border border-slate-600 rounded-lg shadow-xl py-1 min-w-[160px]"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+        >
+          <button
+            onClick={() => startRename(contextMenu.routine)}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+          >
+            Rename
+          </button>
+          <button
+            onClick={() => { onShareRoutine(contextMenu.routine); setContextMenu(null); }}
+            className="w-full text-left px-3 py-1.5 text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+          >
+            Share with Marius
+          </button>
+        </div>
+      )}
     </div>
   );
 }

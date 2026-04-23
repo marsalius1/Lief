@@ -9,6 +9,7 @@ const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 export default function Sidebar({ routines, onTaskClick, activeId }) {
   const [showImport, setShowImport] = useState(false);
   const [importText, setImportText] = useState('');
+  const [shareRoutine, setShareRoutine] = useState(null);
   const importRef = useRef(null);
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export default function Sidebar({ routines, onTaskClick, activeId }) {
         </div>
       )}
 
-      <RoutineSelector routines={routines} />
+      <RoutineSelector routines={routines} onShareRoutine={setShareRoutine} />
 
       <ParkingLot
         tasks={unscheduledTasks}
@@ -116,9 +117,23 @@ export default function Sidebar({ routines, onTaskClick, activeId }) {
         </div>
       </div>
 
-      {routines.activeRoutine && (
-        <ShareButton routine={routines.activeRoutine} />
-      )}
+      <div className="px-4 py-3 border-t border-slate-700">
+        <button
+          onClick={() => routines.activeRoutine && setShareRoutine(routines.activeRoutine)}
+          className="w-full text-xs font-medium px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex items-center justify-center gap-2"
+        >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
+          Share with Marius
+        </button>
+      </div>
+
+      <ShareButton
+        routine={shareRoutine}
+        open={!!shareRoutine}
+        onClose={() => setShareRoutine(null)}
+      />
     </div>
   );
 }

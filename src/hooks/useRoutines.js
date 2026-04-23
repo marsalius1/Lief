@@ -63,6 +63,15 @@ export default function useRoutines() {
     }));
   }, []);
 
+  const renameRoutine = useCallback((id, name) => {
+    setState((prev) => ({
+      ...prev,
+      routines: prev.routines.map((r) =>
+        r.id === id ? { ...r, name } : r
+      ),
+    }));
+  }, []);
+
   const deleteRoutine = useCallback((id) => {
     setState((prev) => {
       const remaining = prev.routines.filter((r) => r.id !== id);
@@ -204,6 +213,7 @@ export default function useRoutines() {
     activeRoutineId,
     setActiveRoutineId,
     addRoutine,
+    renameRoutine,
     deleteRoutine,
     addTask,
     updateTask,
