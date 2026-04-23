@@ -1,5 +1,5 @@
 // "Share with Marius" button — sends active routine JSON via EmailJS
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const SERVICE_ID = 'service_vr6xd17';
 const TEMPLATE_ID = 'template_4weog9r';
@@ -7,6 +7,12 @@ const PUBLIC_KEY = 's_WKtppyZ__dTYspN';
 
 export default function ShareButton({ routine }) {
   const [state, setState] = useState('idle'); // idle | confirm | sending | sent | error
+  const [userName, setUserName] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (state === 'confirm') inputRef.current?.focus();
+  }, [state]);
 
   function handleClick() {
     setState('confirm');
@@ -14,9 +20,14 @@ export default function ShareButton({ routine }) {
 
   function handleCancel() {
     setState('idle');
+    setUserName('');
   }
 
   async function handleSend() {
+    if (!userName.trim()) {
+      inputRef.current?.focus();
+      return;
+    }
     setState('sending');
     try {
       const payload = {
@@ -24,7 +35,7 @@ export default function ShareButton({ routine }) {
         template_id: TEMPLATE_ID,
         user_id: PUBLIC_KEY,
         template_params: {
-          name: routine.name,
+          name: userName.trim(),
           template_json: JSON.stringify(routine, null, 2),
         },
       };
@@ -37,6 +48,7 @@ export default function ShareButton({ routine }) {
 
       if (!res.ok) throw new Error('Send failed');
       setState('sent');
+      setUserName('');
       setTimeout(() => setState('idle'), 3000);
     } catch {
       setState('error');
@@ -48,8 +60,16 @@ export default function ShareButton({ routine }) {
     return (
       <div className="px-4 py-3 border-t border-slate-700">
         <p className="text-xs text-slate-300 mb-2">
-          This sends your "<span className="font-medium">{routine.name}</span>" template to Marius. No other data is shared.
+          Sharing "<span className="font-medium text-white">{routine.name}</span>" template with Marius. No other data is shared.
         </p>
+        <input
+          ref={inputRef}
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSend(); if (e.key === 'Escape') handleCancel(); }}
+          placeholder="Your name"
+          className="w-full text-sm bg-slate-800 text-white placeholder-slate-500 rounded px-3 py-1.5 mb-2 outline-none focus:ring-1 focus:ring-blue-500"
+        />
         <div className="flex gap-2">
           <button
             onClick={handleSend}
@@ -70,9 +90,6 @@ export default function ShareButton({ routine }) {
 
   return (
     <div className="px-4 py-3 border-t border-slate-700">
-      <p className="text-xs text-slate-500 text-center mb-3 leading-relaxed">
-        100% private. Your schedule is stored locally on your device — no data is sent to any server.
-      </p>
       {state === 'sending' && (
         <button disabled className="w-full text-xs font-medium px-3 py-2 rounded bg-slate-700 text-slate-400">
           Sending...

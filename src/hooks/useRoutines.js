@@ -178,6 +178,26 @@ export default function useRoutines() {
     [updateActiveTasks]
   );
 
+  const importRoutine = useCallback((json) => {
+    try {
+      const routine = JSON.parse(json);
+      if (!routine.name || !Array.isArray(routine.tasks)) throw new Error('Invalid format');
+      const id = crypto.randomUUID();
+      const imported = {
+        ...routine,
+        id,
+        tasks: routine.tasks.map((t) => ({ ...t, id: crypto.randomUUID() })),
+      };
+      setState((prev) => ({
+        routines: [...prev.routines, imported],
+        activeRoutineId: id,
+      }));
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   return {
     routines,
     activeRoutine,
@@ -193,5 +213,6 @@ export default function useRoutines() {
     reorderTasks,
     repeatTask,
     updateTasks,
+    importRoutine,
   };
 }
