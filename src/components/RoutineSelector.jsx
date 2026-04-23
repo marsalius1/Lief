@@ -39,7 +39,7 @@ export default function RoutineSelector({ routines: r }) {
               />
               <span className="flex-1 truncate">{routine.name}</span>
               {/* Delete — hidden for the first routine (Default) */}
-              {r.routines.length > 1 && r.routines[0].id !== routine.id && (
+              {r.routines.length > 1 && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -47,10 +47,7 @@ export default function RoutineSelector({ routines: r }) {
                       r.deleteRoutine(routine.id);
                     }
                   }}
-                  className="opacity-0 group-hover:opacity-100 hover:!opacity-100 p-0.5 text-slate-500 hover:text-red-400 transition-colors"
-                  style={{ opacity: undefined }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = 1)}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '')}
+                  className="p-0.5 text-slate-600 hover:text-red-400 transition-colors"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M2 2l8 8M2 10l8-8" />

@@ -1,5 +1,5 @@
 // Left sidebar — routine selector, parking lot for unscheduled tasks
-import { useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import RoutineSelector from './RoutineSelector';
 import ParkingLot from './ParkingLot';
 import ShareButton from './ShareButton';
@@ -7,22 +7,28 @@ import ShareButton from './ShareButton';
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 export default function Sidebar({ routines, onTaskClick, activeId }) {
-  const fileRef = useRef(null);
+  const [showImport, setShowImport] = useState(false);
+  const [importText, setImportText] = useState('');
+  const importRef = useRef(null);
+
+  useEffect(() => {
+    if (showImport) importRef.current?.focus();
+  }, [showImport]);
+
+  function handleImportSubmit() {
+    if (!importText.trim()) return;
+    const ok = routines.importRoutine(importText.trim());
+    if (ok) {
+      setImportText('');
+      setShowImport(false);
+    } else {
+      alert('Invalid template JSON.');
+    }
+  }
+
   const unscheduledTasks = (routines.activeRoutine?.tasks || []).filter(
     (t) => t.scheduledTime === null
   );
-
-  function handleImport(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const ok = routines.importRoutine(reader.result);
-      if (!ok) alert('Invalid template file.');
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  }
 
   return (
     <div className="w-[300px] min-w-[300px] bg-slate-900 text-white flex flex-col h-screen border-r border-slate-700">
@@ -33,16 +39,42 @@ export default function Sidebar({ routines, onTaskClick, activeId }) {
           <p className="text-xs text-slate-400 mt-0.5">Plan your day</p>
         </div>
         <button
-          onClick={() => fileRef.current?.click()}
+          onClick={() => setShowImport((v) => !v)}
           title="Import template"
-          className="text-slate-600 hover:text-slate-400 transition-colors"
+          className={`transition-colors ${showImport ? 'text-slate-300' : 'text-slate-600 hover:text-slate-400'}`}
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
           </svg>
         </button>
-        <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
       </div>
+
+      {showImport && (
+        <div className="px-4 py-3 border-b border-slate-700">
+          <textarea
+            ref={importRef}
+            value={importText}
+            onChange={(e) => setImportText(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Escape') { setShowImport(false); setImportText(''); } }}
+            placeholder="Paste template JSON here..."
+            className="w-full h-20 text-xs bg-slate-800 text-white placeholder-slate-500 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+          />
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={handleImportSubmit}
+              className="flex-1 text-xs font-medium px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+            >
+              Import
+            </button>
+            <button
+              onClick={() => { setShowImport(false); setImportText(''); }}
+              className="flex-1 text-xs font-medium px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {isSafari && (
         <div className="mx-4 mt-3 px-3 py-2 rounded bg-yellow-900/40 border border-yellow-700/50 flex items-start gap-2">
