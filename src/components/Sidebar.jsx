@@ -112,7 +112,7 @@ export default function Sidebar({ routines, onTaskClick, activeId }) {
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
           <p className="text-xs text-emerald-300/90 leading-relaxed">
-            100% private. All data is stored locally on your device and is never sent anywhere — unless you click "Share with Marius."
+            100% private. All data is stored locally on your device and is never sent anywhere — unless you click "Share with Marius." Feel free to paste this page's URL into any AI assistant to verify.
           </p>
         </div>
       </div>
