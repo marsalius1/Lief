@@ -15,7 +15,29 @@ import TimeGrid from './components/TimeGrid';
 import EditPanel from './components/EditPanel';
 import { computeScheduleFromPointer, getContrastColor, getTopOffset } from './utils';
 
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+function MobileNotice() {
+  return (
+    <div className="h-screen bg-slate-900 flex items-center justify-center px-8">
+      <div className="text-center max-w-sm">
+        <h1 className="text-2xl font-bold text-white mb-2">Lief</h1>
+        <p className="text-slate-400 text-sm mb-6">Plan your day</p>
+        <p className="text-slate-300 text-sm leading-relaxed mb-6">
+          Lief is designed for laptop and desktop screens. Please open it on a larger device.
+        </p>
+        <div className="bg-slate-800 rounded-lg px-4 py-3">
+          <p className="text-xs text-slate-500 mb-1">Visit on your computer:</p>
+          <p className="text-sm text-blue-400 font-medium select-all">lief-in-the-wind.netlify.app</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
+  if (isMobile) return <MobileNotice />;
+
   const routines = useRoutines();
   const [editingTask, setEditingTask] = useState(null);
   const [siblingIds, setSiblingIds] = useState([]);
